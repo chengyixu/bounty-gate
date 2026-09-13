@@ -51,7 +51,9 @@ def assess(report: dict[str, Any]) -> dict[str, Any]:
         {
             str(url)
             for url in evidence.get("urls", [])
-            if url and any(marker in str(url).lower() for marker in PAYOUT_URL_MARKERS)
+            if url
+            and any(marker in str(url).lower() for marker in PAYOUT_URL_MARKERS)
+            and str(url).lower() in trusted_text
         }
     )
     if not payout_route_urls:

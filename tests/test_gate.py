@@ -25,7 +25,7 @@ class GateTests(unittest.TestCase):
                     "maintainer_statements": [
                         {
                             "association": "MEMBER",
-                            "body": "This $100 bounty is funded and paid after an accepted patch.",
+                            "body": "This $100 bounty is funded and paid after an accepted patch; payout terms: https://example.test/payout-terms.",
                         }
                     ],
                     "urls": ["https://example.test/payout-terms"],
@@ -91,6 +91,32 @@ class GateTests(unittest.TestCase):
         self.assertFalse(result["eligible"])
         self.assertIn("unverified_funding", result["blockers"])
         self.assertEqual(result["next_step"], "do_not_claim")
+
+    def test_rejects_unattributed_payout_url(self):
+        result = assess(
+            {
+                "evidence": {
+                    "state": "open",
+                    "issue_amounts_usd": [100.0],
+                    "comment_amounts_usd": [],
+                    "policy_amounts_usd": [],
+                    "assignees": [],
+                    "claimers": [],
+                    "open_pull_requests": [],
+                    "report_only_policy_detected": False,
+                    "repository_archived": False,
+                    "maintainer_statements": [
+                        {
+                            "association": "OWNER",
+                            "body": "This $100 bounty is funded and paid after acceptance.",
+                        }
+                    ],
+                    "urls": ["https://untrusted.example.test/payout"],
+                }
+            }
+        )
+        self.assertFalse(result["eligible"])
+        self.assertIn("missing_payout_route", result["blockers"])
 
     def test_rejects_irrelevant_url_without_trusted_payout_route(self):
         result = assess(
